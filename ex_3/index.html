@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Vulnérable</title>
+</head>
+<body>
+    <h1>Profil Utilisateur</h1>
+    <form id="loginForm">
+        <label for="username">Nom d'utilisateur:</label>
+        <input type="text" id="username" name="username" required>
+        <br>
+        <label for="password">Mot de passe:</label>
+        <input type="password" id="password" name="password" required>
+        <br>
+        <button type="submit">Se connecter</button>
+    </form>
+
+    <div id="profileSection" style="display: none;">
+        <h2>Profil de l'utilisateur</h2>
+        <p id="profileData"></p>
+    </div>
+
+    <script>
+        // Simule une base de données d'utilisateurs avec leurs credentials
+        const users = {
+            1: { name: "Alice", email: "alice@example.com", username: "alice", password: "pass123" },
+            2: { name: "Bob", email: "bob@example.com", username: "bob", password: "pass123" },
+            3: { name: "Charlie", email: "charlie@example.com", username: "charlie", password: "pass123" }
+        };
+
+        // Simule une session utilisateur
+        let currentUserId = null;
+
+        // Gestion de la connexion
+        document.getElementById('loginForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // Authentification
+            const userId = Object.keys(users).find(id => 
+                users[id].username === username && users[id].password === password
+            );
+
+            if (userId) {
+                currentUserId = userId;
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('profileSection').style.display = 'block';
+                // Charge le profil avec l'ID de l'utilisateur connecté
+                window.location.href = `?id=${userId}`;
+            } else {
+                alert("Identifiants invalides !");
+            }
+        });
+
+        // Charge le profil de l'utilisateur
+        function loadProfile(userId) {
+            const user = users[userId];
+            if (user) {
+                // Vérifie si l'utilisateur accède à un profil différent du sien
+                if (currentUserId && userId !== currentUserId) {
+                    const toast = document.getElementById('toast');
+                    toast.style.display = 'block';
+                    setTimeout(() => {
+                        toast.style.display = 'none';
+                    }, 3000);
+                }
+                
+                document.getElementById('profileData').innerHTML = `
+                    <h3>Informations personnelles</h3>
+                    <p><strong>Nom:</strong> ${user.name}</p>
+                    <p><strong>Email:</strong> ${user.email}</p>
+                    <p><strong>Username:</strong> ${user.username}</p>
+                    <p class="warning">Vous êtes connecté en tant que ${user.name} (ID: ${userId})</p>
+                `;
+            } else {
+                document.getElementById('profileData').innerText = "Utilisateur non trouvé !";
+            }
+        }
+
+        // Vérifie l'ID dans l'URL et charge le profil
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('id');
+        if (userId) {
+            document.getElementById('profileSection').style.display = 'block';
+            document.getElementById('loginForm').style.display = 'none';
+            loadProfile(userId);
+        }
+    </script>
+</body>
+</html>
